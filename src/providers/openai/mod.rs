@@ -102,6 +102,7 @@ mod tests {
             width: 1024,
             height: 1024,
             num_images: 1,
+            ..Default::default()
         };
 
         let provider: OpenAiProvider = OpenAiProvider::from(&config);

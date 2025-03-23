@@ -3,7 +3,7 @@
 mod errors;
 mod images;
 mod parameters;
-mod providers;
+pub mod providers;
 
 pub use errors::LvmError;
 pub use images::LvmImage;
