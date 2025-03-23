@@ -1,0 +1,24 @@
+[package]
+name = "lvm_multi_api"
+description = "A library for interacting with multiple Large Vision Model (LVM) APIs."
+readme = "README.md"
+license = "MIT"
+version = "0.1.0"
+edition = "2024"
+authors = ["Thomas Young <35073576+DrakeRichards@users.noreply.github.com>"]
+
+[dependencies]
+anyhow = "1.0.97"
+async-openai = "0.28.0"
+async-trait = "0.1.88"
+base64 = "0.22.1"
+dotenvy = "0.15.7"
+
+[dev-dependencies]
+tokio = { version = "1.44.1", features = ["full"] }
+tempfile = "3.18.0"
+
+[lints.clippy]
+unwrap_used = "warn"
+expect_used = "warn"
+panic = "warn"
