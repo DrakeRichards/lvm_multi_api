@@ -92,3 +92,24 @@ fn test_t2i_automatic1111_multiple() {
     assert!(!images.last().unwrap().data.is_empty());
     assert_eq!(images.len(), 2);
 }
+
+/// Generate an image given a text input using XAI
+#[test]
+fn test_t2i_xai() {
+    let config = ProviderConfiguration::default();
+    let prompt: ImagePrompt = ImagePrompt {
+        positive: Some("A painting of a cat".to_string()),
+        negative: None,
+    };
+    let request = TextToImageRequest {
+        model: Some("grok-2-image".to_string()),
+        prompt,
+        ..Default::default()
+    };
+    let provider = LvmProviders::XAi(config);
+    let rt = Runtime::new().unwrap();
+    let image: Vec<LvmImage> = rt
+        .block_on(async move { provider.text_to_image(request).await })
+        .unwrap();
+    assert!(!image.first().unwrap().data.is_empty());
+}

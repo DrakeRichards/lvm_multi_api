@@ -7,9 +7,15 @@ version = "0.1.0"
 edition = "2024"
 authors = ["Thomas Young <35073576+DrakeRichards@users.noreply.github.com>"]
 
+[features]
+default = ["openai", "xai", "automatic1111"]
+openai = ["async-openai"]
+xai = ["async-openai"]
+automatic1111 = []
+
 [dependencies]
 anyhow = "1.0.97"
-async-openai = "0.28.0"
+async-openai = { version = "0.28.0", optional = true, features = ["byot"] }
 async-trait = "0.1.88"
 base64 = "0.22.1"
 dotenvy = "0.15.7"

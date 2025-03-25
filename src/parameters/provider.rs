@@ -1,5 +1,5 @@
 /// Parameters common to most LVM providers.
-#[derive(Clone, Default)]
+#[derive(Clone, Default, Debug)]
 pub struct ProviderConfiguration {
     /// The base URL of the provider.
     pub base_url: Option<String>,
