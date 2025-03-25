@@ -2,8 +2,8 @@
 
 use super::{Automatic1111Provider, txt2img::Txt2ImgRequestBody};
 use crate::{
-    ImagePrompt,
     images::{LvmImage, LvmImageMetadata},
+    parameters::text_to_image::TextToImageRequest,
 };
 use anyhow::{Result, anyhow};
 use base64::Engine;
@@ -27,12 +27,12 @@ enum TaskStatus {
     Interrupted,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Clone)]
 struct OverrideSettings {}
 
 /// Request body for starting a new image generation task.
-#[derive(Debug, Serialize, Default)]
-struct RequestBody {
+#[derive(Debug, Serialize, Default, Clone)]
+struct QueueRequestBody {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub prompt: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -60,6 +60,38 @@ struct RequestBody {
     pub vae: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub callback_url: Option<String>,
+}
+
+/// Convert an f64 to a serde_json::Number.
+/// Used to convert cfg_scale to a Number.
+/// If the conversion fails, prints a warning and returns None.
+fn cfg_scale_to_number(f: f64) -> Option<Number> {
+    Number::from_f64(f).or_else(|| {
+        eprintln!("Warning: Could not convert cfg_scale to Number.");
+        None
+    })
+}
+
+impl From<TextToImageRequest> for QueueRequestBody {
+    fn from(request: TextToImageRequest) -> Self {
+        let mut queue_request = QueueRequestBody {
+            prompt: request.prompt.positive,
+            negative_prompt: request.prompt.negative,
+            width: request.width.map(|w| w.into()),
+            height: request.height.map(|h| h.into()),
+            ..Default::default()
+        };
+        if let Some(extended_params) = request.extended {
+            queue_request.batch_size = extended_params.batch_size.map(|bs| bs.into());
+            queue_request.steps = extended_params.steps.map(|s| s.into());
+            queue_request.sampler_name = extended_params.sampler_name;
+            queue_request.cfg_scale = extended_params.cfg_scale.and_then(cfg_scale_to_number);
+            queue_request.checkpoint = extended_params.checkpoint;
+            queue_request.vae = extended_params.vae;
+            queue_request.callback_url = extended_params.callback_url;
+        }
+        queue_request
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -111,7 +143,7 @@ struct TaskResultsData {
 impl Automatic1111Provider {
     /// Send a POST request to `/agent-scheduler/v1/queue/txt2img` to start a new image generation task.
     /// The response contains the task_id for the image generation task.
-    async fn start_image_generation_task(&self, request_body: &RequestBody) -> Result<TaskId> {
+    async fn start_image_generation_task(&self, request_body: &QueueRequestBody) -> Result<TaskId> {
         let endpoint = "/agent-scheduler/v1/queue/txt2img";
         let url = format!("{}{}", self.base_url, endpoint);
         let body = serde_json::to_string(request_body)?;
@@ -198,23 +230,43 @@ impl Automatic1111Provider {
         }
     }
 
-    /// Add a txt2img task to the queue and wait for it to complete.
-    pub async fn queue_txt2img(&self, prompt: ImagePrompt) -> Result<Vec<LvmImage>> {
-        let cfg_scale = Number::from_f64(self.cfg_scale)
-            .ok_or(anyhow!("Failed to convert cfg_scale to Number."))?;
-        let request_body = RequestBody {
-            prompt: prompt.positive_prompt,
-            negative_prompt: prompt.negative_prompt,
-            checkpoint: Some(self.model.clone()),
-            cfg_scale: Some(cfg_scale),
-            sampler_name: Some(self.sampler_name.clone()),
-            height: Some(self.height.into()),
-            width: Some(self.width.into()),
-            steps: Some(self.steps.into()),
-            ..Default::default()
-        };
-        let task_id = self.start_image_generation_task(&request_body).await?;
-        let images = self.poll_task(&task_id).await?;
+    /// Send txt2img tasks to the queue for each num_batches.
+    pub async fn queue_txt2img(&self, request: TextToImageRequest) -> Result<Vec<LvmImage>> {
+        // If num_batches is None, default to 1.
+        let num_batches = request.num_batches.unwrap_or(1);
+
+        // Convert the request to a QueueRequestBody.
+        let request = QueueRequestBody::from(request);
+
+        // Send the requests to the queue and get the task_ids.
+        let provider_config = std::sync::Arc::new(self.clone());
+        let handles = (0..num_batches).map(|_| {
+            let provider_config = std::sync::Arc::clone(&provider_config);
+            let request_clone = request.clone();
+            tokio::spawn(async move {
+                provider_config
+                    .start_image_generation_task(&request_clone)
+                    .await
+            })
+        });
+        let mut task_ids: Vec<Result<TaskId>> = Vec::new();
+        for handle in handles {
+            task_ids.push(handle.await?);
+        }
+
+        // Poll the tasks until they are complete.
+        let mut images = Vec::new();
+        for task_id in task_ids {
+            match task_id {
+                Ok(task_id) => {
+                    let task_images = self.poll_task(&task_id).await?;
+                    images.extend(task_images);
+                }
+                Err(e) => {
+                    eprintln!("Error starting task: {}", e);
+                }
+            }
+        }
         Ok(images)
     }
 }
@@ -229,7 +281,7 @@ mod tests {
     #[serial(stable_diffusion, local_server)]
     async fn test_start_image_generation_task() -> Result<()> {
         let provider = Automatic1111Provider::default();
-        let request_body = RequestBody::default();
+        let request_body = QueueRequestBody::default();
         let task_id = provider.start_image_generation_task(&request_body).await?;
         // Assert that we get a task_id.
         assert!(!task_id.is_empty());
@@ -240,7 +292,7 @@ mod tests {
     #[serial(stable_diffusion, local_server)]
     async fn test_poll_task() -> Result<()> {
         let provider = Automatic1111Provider::default();
-        let request_body = RequestBody::default();
+        let request_body = QueueRequestBody::default();
         let task_id = provider.start_image_generation_task(&request_body).await?;
         let image = provider.poll_task(&task_id).await?;
         assert!(!image.first().unwrap().data.is_empty());

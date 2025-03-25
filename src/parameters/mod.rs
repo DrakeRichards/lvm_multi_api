@@ -1,5 +1,6 @@
 //! Parameters used to generate images.
 
-mod prompt;
-
-pub use prompt::ImagePrompt;
+pub mod common;
+pub mod prompt;
+pub mod provider;
+pub mod text_to_image;

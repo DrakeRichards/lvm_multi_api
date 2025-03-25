@@ -1,5 +1,6 @@
-#[derive(Clone)]
+/// A prompt for an image generation request.
+#[derive(Clone, Default)]
 pub struct ImagePrompt {
-    pub positive_prompt: Option<String>,
-    pub negative_prompt: Option<String>,
+    pub positive: Option<String>,
+    pub negative: Option<String>,
 }

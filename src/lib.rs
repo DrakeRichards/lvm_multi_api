@@ -2,13 +2,13 @@
 
 mod errors;
 mod images;
-mod parameters;
+pub mod parameters;
 pub mod providers;
+mod traits;
 
 pub use errors::LvmError;
 pub use images::LvmImage;
-pub use parameters::ImagePrompt;
-pub use providers::{LvmProviderConfig, LvmProviders};
+pub use providers::LvmProviders;
 
 #[cfg(test)]
 mod tests {

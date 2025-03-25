@@ -1,68 +1,40 @@
 pub mod api;
 
 use crate::{
-    ImagePrompt, LvmImage,
-    providers::{LvmProviderConfig, TextToImageProvider},
+    LvmImage, parameters::provider::ProviderConfiguration,
+    parameters::text_to_image::TextToImageRequest, traits::TextToImageProvider,
 };
 use anyhow::Result;
 use async_trait::async_trait;
-use serde::{Deserialize, Serialize};
 
+const DEFAULT_BASE_URL: &str = "http://localhost:7860";
+
+/// A provider for generating images with the Automatic1111 instance.
+/// These are the fields common to all requests to the Automatic1111 provider.
+/// Most of these fields are optional since Automatic1111 will fill in the missing fields with default values set on the server.
+#[derive(Debug, Clone)]
 pub struct Automatic1111Provider {
     pub base_url: String,
-    pub model: String,
-    pub steps: u32,
-    pub sampler_name: String,
-    pub cfg_scale: f64,
-    pub width: u32,
-    pub height: u32,
-    pub num_images: u8,
 }
 
 impl Default for Automatic1111Provider {
     fn default() -> Self {
         Self {
-            base_url: "http://localhost:7860".to_string(),
-            model: "UniPC".to_string(),
-            steps: 10,
-            sampler_name: "UniPC".to_string(),
-            cfg_scale: 3.0,
-            width: 1024,
-            height: 1024,
-            num_images: 1,
+            base_url: DEFAULT_BASE_URL.to_string(),
         }
     }
 }
 
-impl From<&LvmProviderConfig> for Automatic1111Provider {
+impl From<&ProviderConfiguration> for Automatic1111Provider {
     /// Create a new Automatic1111Provider from a LvmProviderConfig.
     /// Also fills in the missing fields with default values.
     /// These can be overridden with the `with_extra_config` method.
-    fn from(config: &LvmProviderConfig) -> Self {
+    fn from(config: &ProviderConfiguration) -> Self {
         Automatic1111Provider {
-            base_url: "http://localhost:7860".to_string(),
-            model: config.model.clone(),
-            steps: config.steps.unwrap_or(10),
-            sampler_name: config.sampler_name.clone().unwrap_or("UniPC".to_string()),
-            cfg_scale: config.cfg_scale.unwrap_or(3.0),
-            width: config.width,
-            height: config.height,
-            num_images: config.num_images,
-        }
-    }
-}
-
-/// A provider for generating images with a local Stable Diffusion instance.
-#[derive(Deserialize, Debug, Serialize)]
-pub struct StableDiffusionXLProvider {
-    /// The URL for the local Stable Diffusion instance.
-    pub url: String,
-}
-
-impl Default for StableDiffusionXLProvider {
-    fn default() -> Self {
-        Self {
-            url: "http://localhost:7860".to_string(),
+            base_url: config
+                .base_url
+                .clone()
+                .unwrap_or(DEFAULT_BASE_URL.to_string()),
         }
     }
 }
@@ -70,7 +42,7 @@ impl Default for StableDiffusionXLProvider {
 #[async_trait]
 impl TextToImageProvider for Automatic1111Provider {
     /// Generate images from text prompts using the Automatic1111 provider.
-    async fn text_to_image(&self, prompt: &ImagePrompt) -> Result<Vec<LvmImage>> {
-        self.queue_txt2img(prompt.clone()).await
+    async fn text_to_image(&self, request: TextToImageRequest) -> Result<Vec<LvmImage>> {
+        self.queue_txt2img(request).await
     }
 }
