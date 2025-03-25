@@ -56,6 +56,10 @@ impl TextToImageProvider for OpenAiProvider {
         // Load environment variables from a .env file.
         dotenv()?;
 
+        // Check if the API key environment variable is set.
+        std::env::var("OPENAI_API_KEY")
+            .map_err(|_| anyhow::anyhow!("OPENAI_API_KEY environment variable not set."))?;
+
         // Create a new OpenAI client.
         let client = Client::new();
 

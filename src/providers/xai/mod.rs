@@ -47,7 +47,9 @@ impl TextToImageProvider for XAiProvider {
         dotenv()?;
 
         // Get the API key from the environment.
-        let api_key = std::env::var("XAI_API_KEY")?;
+        // If the API key is not set, return an error telling the user to set it.
+        let api_key = std::env::var("XAI_API_KEY")
+            .map_err(|_| anyhow::anyhow!("XAI_API_KEY environment variable not set."))?;
 
         // Create a new OpenAI client.
         let client = Client::with_config(
@@ -80,5 +82,33 @@ impl TextToImageProvider for XAiProvider {
 impl From<&ProviderConfiguration> for XAiProvider {
     fn from(_config: &ProviderConfiguration) -> Self {
         XAiProvider {}
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{parameters::prompt::ImagePrompt, providers::LvmProviders};
+    use tokio::runtime::Runtime;
+
+    /// Generate an image given a text input using XAI
+    #[test]
+    fn test_t2i_xai() {
+        let prompt: ImagePrompt = ImagePrompt {
+            positive: Some("A painting of a cat".to_string()),
+            negative: Some("dog".to_string()),
+        };
+        let request = TextToImageRequest {
+            model: Some("grok-2-image".to_string()),
+            prompt,
+            num_batches: Some(1),
+            ..Default::default()
+        };
+        let provider = LvmProviders::XAi(ProviderConfiguration::default());
+        let rt = Runtime::new().unwrap();
+        let images: Vec<LvmImage> = rt
+            .block_on(async move { provider.text_to_image(request).await })
+            .unwrap();
+        assert!(!images.first().unwrap().data.is_empty());
     }
 }
