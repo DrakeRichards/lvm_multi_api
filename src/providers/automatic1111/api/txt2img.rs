@@ -2,11 +2,11 @@
 //! Will try to execute requests in parallel if there are multiple requests.
 //! Generally don't use this: use the `queue` module instead.
 
-use super::Automatic1111Provider;
-use crate::{LvmImage, images::LvmImageMetadata};
-use anyhow::Result;
+//use super::Automatic1111Provider;
+//use crate::{LvmImage, images::LvmImageMetadata};
+//use anyhow::Result;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
+//use serde_json::Value;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Txt2ImgRequestBody {
@@ -35,6 +35,7 @@ impl Default for Txt2ImgRequestBody {
     }
 }
 
+/*
 impl Automatic1111Provider {
     /// Send a POST request to `/sdapi/v1/txt2img` to start a new image generation task.
     /// The response contains the images in base64 encoding.
@@ -98,3 +99,4 @@ mod tests {
         assert_eq!(image.height(), 1024);
     }
 }
+*/

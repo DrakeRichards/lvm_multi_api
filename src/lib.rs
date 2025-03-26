@@ -2,12 +2,17 @@
 
 mod errors;
 mod images;
-pub mod parameters;
-pub mod providers;
+mod parameters;
+mod providers;
 mod traits;
 
 pub use errors::LvmError;
 pub use images::LvmImage;
+pub use parameters::{
+    prompt::ImagePrompt,
+    provider::ProviderConfiguration,
+    text_to_image::{TextToImageRequest, TextToImageRequestExtendedParameters},
+};
 pub use providers::LvmProviders;
 
 #[cfg(test)]

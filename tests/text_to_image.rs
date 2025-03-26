@@ -1,10 +1,6 @@
 use lvm_multi_api::{
-    LvmImage, LvmProviders,
-    parameters::{
-        prompt::ImagePrompt,
-        provider::ProviderConfiguration,
-        text_to_image::{TextToImageRequest, TextToImageRequestExtendedParameters},
-    },
+    ImagePrompt, LvmImage, LvmProviders, ProviderConfiguration, TextToImageRequest,
+    TextToImageRequestExtendedParameters,
 };
 use tokio::runtime::Runtime;
 
