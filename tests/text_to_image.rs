@@ -9,8 +9,8 @@ use tokio::runtime::Runtime;
 fn test_t2i_openai() {
     let config = ProviderConfiguration::default();
     let prompt: ImagePrompt = ImagePrompt {
-        positive: Some("A painting of a cat".to_string()),
-        negative: None,
+        positive_prompt: Some("A painting of a cat".to_string()),
+        negative_prompt: None,
     };
     let request = TextToImageRequest {
         model: Some("dall-e-3".to_string()),
@@ -33,8 +33,8 @@ fn test_t2i_automatic1111() {
         ..Default::default()
     };
     let prompt: ImagePrompt = ImagePrompt {
-        positive: Some("A painting of a cat".to_string()),
-        negative: Some("dog".to_string()),
+        positive_prompt: Some("A painting of a cat".to_string()),
+        negative_prompt: Some("dog".to_string()),
     };
     let request = TextToImageRequest {
         model: Some("sd_xl_base_1.0".to_string()),
@@ -63,8 +63,8 @@ fn test_t2i_automatic1111_multiple() {
         ..Default::default()
     };
     let prompt: ImagePrompt = ImagePrompt {
-        positive: Some("A painting of a cat".to_string()),
-        negative: Some("dog".to_string()),
+        positive_prompt: Some("A painting of a cat".to_string()),
+        negative_prompt: Some("dog".to_string()),
     };
     let request = TextToImageRequest {
         model: Some("sd_xl_base_1.0".to_string()),
@@ -94,8 +94,8 @@ fn test_t2i_automatic1111_multiple() {
 fn test_t2i_xai() {
     let config = ProviderConfiguration::default();
     let prompt: ImagePrompt = ImagePrompt {
-        positive: Some("A painting of a cat".to_string()),
-        negative: None,
+        positive_prompt: Some("A painting of a cat".to_string()),
+        negative_prompt: None,
     };
     let request = TextToImageRequest {
         model: Some("grok-2-image".to_string()),

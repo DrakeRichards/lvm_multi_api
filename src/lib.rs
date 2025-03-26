@@ -6,6 +6,9 @@ mod parameters;
 mod providers;
 mod traits;
 
+#[cfg(feature = "clap")]
+pub mod cli;
+
 pub use errors::LvmError;
 pub use images::LvmImage;
 pub use parameters::{

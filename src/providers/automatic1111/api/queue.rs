@@ -75,8 +75,8 @@ fn cfg_scale_to_number(f: f64) -> Option<Number> {
 impl From<TextToImageRequest> for QueueRequestBody {
     fn from(request: TextToImageRequest) -> Self {
         let mut queue_request = QueueRequestBody {
-            prompt: request.prompt.positive,
-            negative_prompt: request.prompt.negative,
+            prompt: request.prompt.positive_prompt,
+            negative_prompt: request.prompt.negative_prompt,
             width: request.width.map(|w| w.into()),
             height: request.height.map(|h| h.into()),
             ..Default::default()

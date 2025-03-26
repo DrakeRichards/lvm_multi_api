@@ -61,7 +61,7 @@ impl TextToImageProvider for XAiProvider {
         // Create the request.
         let request = CreateImageRequestArgs::default()
             .model(to_xai_model(request.model))
-            .prompt(request.prompt.positive.unwrap_or_default())
+            .prompt(request.prompt.positive_prompt.unwrap_or_default())
             .n(to_xai_batch_size(request.num_batches))
             .response_format(ImageResponseFormat::B64Json)
             // The size parameter is not supported at the moment. Leave it empty.
@@ -95,8 +95,8 @@ mod tests {
     #[test]
     fn test_t2i_xai() {
         let prompt: ImagePrompt = ImagePrompt {
-            positive: Some("A painting of a cat".to_string()),
-            negative: Some("dog".to_string()),
+            positive_prompt: Some("A painting of a cat".to_string()),
+            negative_prompt: Some("dog".to_string()),
         };
         let request = TextToImageRequest {
             model: Some("grok-2-image".to_string()),
