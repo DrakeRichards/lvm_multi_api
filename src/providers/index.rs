@@ -15,7 +15,7 @@ use crate::providers::openai::OpenAiProvider;
 use crate::providers::xai::XAiProvider;
 
 /// Supported LVM providers.
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub enum LvmProviders {
     #[cfg(feature = "openai")]
     OpenAi(ProviderConfiguration),
@@ -23,6 +23,19 @@ pub enum LvmProviders {
     Automatic1111(ProviderConfiguration),
     #[cfg(feature = "xai")]
     XAi(ProviderConfiguration),
+}
+
+impl Default for LvmProviders {
+    #[allow(unreachable_code, clippy::needless_return, clippy::panic)]
+    fn default() -> Self {
+        #[cfg(feature = "openai")]
+        return LvmProviders::OpenAi(ProviderConfiguration::default());
+        #[cfg(feature = "xai")]
+        return LvmProviders::XAi(ProviderConfiguration::default());
+        #[cfg(feature = "automatic1111")]
+        return LvmProviders::Automatic1111(ProviderConfiguration::default());
+        panic!("No provider feature enabled");
+    }
 }
 
 impl LvmProviders {
