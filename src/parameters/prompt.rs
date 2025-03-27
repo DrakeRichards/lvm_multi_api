@@ -1,8 +1,10 @@
+use serde::{Deserialize, Serialize};
+
 #[cfg(feature = "clap")]
 use clap::Args;
 
 /// A prompt for an image generation request.
-#[derive(Clone, Default, Debug)]
+#[derive(Debug, Deserialize, Default, Serialize, PartialEq, Clone)]
 #[cfg_attr(feature = "clap", derive(Args))]
 pub struct ImagePrompt {
     /// The positive prompt to use for image generation.

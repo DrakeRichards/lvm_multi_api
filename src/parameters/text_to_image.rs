@@ -1,10 +1,11 @@
 use crate::parameters::prompt::ImagePrompt;
+use serde::{Deserialize, Serialize};
 
 #[cfg(feature = "clap")]
 use clap::Args;
 
 /// A request to generate an image from text.
-#[derive(Clone, Default, Debug)]
+#[derive(Debug, Deserialize, Default, Serialize, PartialEq, Clone)]
 #[cfg_attr(feature = "clap", derive(Args))]
 pub struct TextToImageRequest {
     #[cfg_attr(feature = "clap", clap(flatten))]
@@ -26,7 +27,7 @@ pub struct TextToImageRequest {
 }
 
 /// Additional parameters used by some providers.
-#[derive(Clone, Default, Debug)]
+#[derive(Debug, Deserialize, Default, Serialize, PartialEq, Clone)]
 #[cfg_attr(feature = "clap", derive(Args))]
 pub struct TextToImageRequestExtendedParameters {
     /// How many images to generate per batch.

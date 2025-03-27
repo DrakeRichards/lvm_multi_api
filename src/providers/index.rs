@@ -5,6 +5,7 @@ use crate::{
     parameters::text_to_image::TextToImageRequest, traits::TextToImageProvider,
 };
 use anyhow::Result;
+use serde::{Deserialize, Serialize};
 
 #[cfg(feature = "automatic1111")]
 use crate::providers::automatic1111::Automatic1111Provider;
@@ -14,7 +15,7 @@ use crate::providers::openai::OpenAiProvider;
 use crate::providers::xai::XAiProvider;
 
 /// Supported LVM providers.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum LvmProviders {
     #[cfg(feature = "openai")]
     OpenAi(ProviderConfiguration),
