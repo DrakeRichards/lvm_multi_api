@@ -13,12 +13,8 @@ use crate::providers::openai::OpenAiProvider;
 #[cfg(feature = "xai")]
 use crate::providers::xai::XAiProvider;
 
-#[cfg(feature = "clap")]
-use strum::VariantNames;
-
 /// Supported LVM providers.
 #[derive(Clone, Debug)]
-#[cfg_attr(feature = "clap", derive(VariantNames))]
 pub enum LvmProviders {
     #[cfg(feature = "openai")]
     OpenAi(ProviderConfiguration),

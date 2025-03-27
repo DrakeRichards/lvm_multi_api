@@ -66,7 +66,7 @@ impl TextToImageProvider for OpenAiProvider {
         // Create the request.
         let request = CreateImageRequestArgs::default()
             .model(to_openai_model(request.model))
-            .prompt(request.prompt.positive_prompt.unwrap_or_default())
+            .prompt(request.prompt.positive_prompt.unwrap_or(" ".to_string()))
             .n(to_openai_batch_size(request.num_batches))
             .response_format(ImageResponseFormat::B64Json)
             .size(to_openai_size(request.width, request.height))

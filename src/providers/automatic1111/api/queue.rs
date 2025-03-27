@@ -58,8 +58,6 @@ struct QueueRequestBody {
     pub checkpoint: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub vae: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub callback_url: Option<String>,
 }
 
 /// Convert an f64 to a serde_json::Number.
@@ -86,9 +84,9 @@ impl From<TextToImageRequest> for QueueRequestBody {
             queue_request.steps = extended_params.steps.map(|s| s.into());
             queue_request.sampler_name = extended_params.sampler_name;
             queue_request.cfg_scale = extended_params.cfg_scale.and_then(cfg_scale_to_number);
-            queue_request.checkpoint = extended_params.checkpoint;
+            queue_request.checkpoint = request.model;
             queue_request.vae = extended_params.vae;
-            queue_request.callback_url = extended_params.callback_url;
+            queue_request.seed = extended_params.seed.map(|s| s.into());
         }
         queue_request
     }
