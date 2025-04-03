@@ -2,7 +2,7 @@ use crate::{LvmProviders, ProviderConfiguration, TextToImageRequest};
 use clap::{Parser, ValueEnum};
 use serde::{Deserialize, Serialize};
 
-#[derive(Parser, Debug, Serialize, Deserialize, Default)]
+#[derive(Parser, Debug, Serialize, Deserialize, Default, PartialEq, Clone)]
 #[command(version, about)]
 pub struct Cli {
     /// The provider to use
@@ -18,7 +18,7 @@ pub struct Cli {
     pub request: TextToImageRequest,
 }
 
-#[derive(Debug, ValueEnum, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, ValueEnum, Clone, Serialize, Deserialize, Default, PartialEq)]
 pub enum CliLvmProviders {
     #[default]
     OpenAi,
